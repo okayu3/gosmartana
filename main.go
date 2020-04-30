@@ -1,5 +1,6 @@
 ﻿package main
-     
+
 func main() {
-	println("go gosmartana!")
+	println("go gosmartana! 03")
+
 }
