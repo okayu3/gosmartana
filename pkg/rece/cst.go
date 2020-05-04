@@ -26,6 +26,10 @@ const (
 	RREbirth       = 2 + 7
 	RREinnDate     = 2 + 9
 	RREkarte       = 2 + 14
+	RREkananame    = 2 + 37
+	RREtokki       = 2 + 12
+	RREtokkiDen    = 2 + 14
+	RREtokkiPha    = 2 + 9
 	RREprfPha      = 2 + 10
 	RREpnttblPha   = 2 + 11
 	RREircodePha   = 2 + 12

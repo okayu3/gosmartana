@@ -44,6 +44,8 @@ func loadCsvMain(in *os.File, r CsvCallback, mode int) {
 	if (mode == ModeTsvEUC) || (mode == ModeTsvSJIS) || (mode == ModeTsvUTF8) {
 		reader.Comma = '\t'
 	}
+	//行ごとのフィールド数が違ってもOKにする。
+	reader.FieldsPerRecord = -1
 	for {
 		arr, err := reader.Read()
 		if err == io.EOF {
@@ -57,7 +59,7 @@ func loadCsvMain(in *os.File, r CsvCallback, mode int) {
 		}
 		r(arr, lineno)
 	}
-	fmt.Printf("[loading %d lines...]\n", lineno)
+	fmt.Printf("[loaded %d lines.]\n", lineno)
 }
 
 //LoadCSV -- reading one csv file

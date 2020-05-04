@@ -30,14 +30,8 @@ const (
 	locJYNwEda = 10
 )
 
-//Args -- 引数
-type Args struct {
-	Out *os.File
-	Prm []string
-}
-
 //Callback -- コールバック関数の型
-type Callback func([][]string, Args, string) int
+type Callback func([][]string, string, []interface{}) int
 
 func receSorting(arr [][]string, flgJy bool) [][]string {
 	if !flgJy {
@@ -59,8 +53,10 @@ func receSorting(arr [][]string, flgJy bool) [][]string {
 }
 
 //loadMain -- レセプトデータの処理のメイン
-func loadMain(in *os.File, r Callback, a Args, fnm string) {
+func loadMain(in *os.File, r Callback, fnm string, a []interface{}) {
 	reader := csv.NewReader(transform.NewReader(in, japanese.ShiftJIS.NewDecoder()))
+	//行ごとのフィールド数が違ってもOKにする。
+	reader.FieldsPerRecord = -1
 	var sgn, sort, lineno, edano, lnoeda string
 	var rece [][]string
 	receIdx := make(map[string]int)
@@ -82,7 +78,7 @@ func loadMain(in *os.File, r Callback, a Args, fnm string) {
 		lnoeda = strings.Join([]string{lineno, edano}, common.Collon)
 
 		if sort == "MN" {
-			r(receSorting(rece, flgJy), a, fnm)
+			r(receSorting(rece, flgJy), fnm, a)
 			rece = nil
 			receIdx = make(map[string]int)
 			eda = make(map[string]int)
@@ -122,7 +118,7 @@ func loadMain(in *os.File, r Callback, a Args, fnm string) {
 		}
 	}
 	if len(rece) > 0 {
-		r(receSorting(rece, flgJy), a, fnm)
+		r(receSorting(rece, flgJy), fnm, a)
 	}
 }
 
@@ -133,15 +129,15 @@ func failOnError(err error) {
 }
 
 //Load -- レセファイル１つのロード
-func Load(fnm string, r Callback, a Args) {
+func Load(fnm string, r Callback, a []interface{}) {
 	f, err := os.Open(fnm)
 	failOnError(err)
 	defer f.Close()
-	loadMain(f, r, a, fnm)
+	loadMain(f, r, fnm, a)
 }
 
 //LoadArr -- レセファイル群を 一気にロード
-func LoadArr(fnms []string, r Callback, a Args) {
+func LoadArr(fnms []string, r Callback, a []interface{}) {
 	sort.Sort(sort.Reverse(sort.StringSlice(fnms)))
 	for _, fnm := range fnms {
 		Load(fnm, r, a)
