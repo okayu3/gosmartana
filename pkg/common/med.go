@@ -2,7 +2,8 @@ package common
 
 import "strings"
 
-func isDoubtDisease(s string) bool {
+//IsDoubtDisease -- 疑い病名を判定
+func IsDoubtDisease(s string) bool {
 	if s == Empty {
 		return false
 	}

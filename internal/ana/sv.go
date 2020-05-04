@@ -14,6 +14,28 @@ const (
 	gakuForTen = 10
 )
 
+//MstB -- Bマスタのdictionary
+var MstB = make(map[string][]string)
+
+//LoadDisB -- bマスタのロード
+func LoadDisB(fnm string, fnmCd119 string) {
+	var sybcd, sybnm, icd10, cd119 string
+	common.LoadCSV(fnm, func(arr []string, lineno int) {
+		sybcd = arr[3-1]
+		sybnm = arr[6-1]
+		icd10 = arr[16-1]
+		MstB[sybcd] = []string{sybnm, icd10, common.Empty}
+	}, common.ModeCsvSJIS)
+	common.LoadCSV(fnmCd119, func(arr []string, lineno int) {
+		sybcd = arr[1-1]
+		cd119 = arr[2-1]
+		if _, ok := MstB[sybcd]; ok {
+			MstB[sybcd][3-1] = cd119
+		}
+	}, common.ModeCsvSJIS)
+
+}
+
 //MakeSVMed -- 医科レセプトの SV作成
 func MakeSVMed(one [][]string, fnm string, args []interface{}) int {
 	var arr []string
@@ -45,13 +67,13 @@ func MakeSVMed(one [][]string, fnm string, args []interface{}) int {
 			ck = ckey.Get(iKi, iBan, ymdB, gend, name, kananame)
 		} else if sort == "SY" {
 			cntDis++
-			opSaveSV(svHandle, ck, mnKensaku, cntDis, arr)
+			opSaveSV(svHandle, ck, mnKensaku, cntDis, gend, arr)
 		}
 	}
 	return 1
 }
 
-func opSaveSV(svHandle *os.File, ck string, mnKensaku string, cntDis int, arr []string) {
+func opSaveSV(svHandle *os.File, ck string, mnKensaku string, cntDis int, gend string, arr []string) {
 	lineno := arr[2-1]
 	recSeq := arr[3-1]
 	recDsc := arr[4-1]
@@ -62,13 +84,26 @@ func opSaveSV(svHandle *os.File, ck string, mnKensaku string, cntDis int, arr []
 	disnm := arr[9-1]
 	flgMain := arr[10-1]
 
-	cd119 := common.Empty
-	flgDoubt := common.Empty
-	icd10 := common.Empty
-	flgHandw := common.Empty
-	gend := common.Empty
+	disInfo, ok := MstB[sybcd]
+	if (disnm == common.Empty) && ok {
+		disnm = disInfo[0]
+	}
+	icd10 := disInfo[1]
+	cd119 := disInfo[2]
+	flgDoubt := "0"
+	if common.IsDoubtDisease(affix) {
+		flgDoubt = "1"
+	}
+	//flgHandw := common.Empty
+	flgHandw := "0"
+	if sybcd == "0000999" {
+		flgHandw = "1"
+	}
 	gaku := common.Empty
 
-	oneSv := strings.Join([]string{ck, mnKensaku, strconv.Itoa(cntDis), lineno, recDsc, recSeq, sybcd, affix, affix, cd119, icd10, disnm, flgMain, innDate, tenki, flgDoubt, flgHandw, gend, gaku}, common.Comma)
+	oneSv := strings.Join([]string{ck, mnKensaku, strconv.Itoa(cntDis),
+		lineno, recDsc, recSeq, sybcd, affix, affix, cd119, icd10,
+		disnm, flgMain, innDate, tenki, flgDoubt, flgHandw, gend, gaku},
+		common.Comma)
 	svHandle.WriteString(oneSv + "\n")
 }
