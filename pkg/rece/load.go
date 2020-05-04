@@ -2,6 +2,7 @@ package rece
 
 import (
 	"encoding/csv"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -59,6 +60,7 @@ func loadMain(in *os.File, r Callback, fnm string, a []interface{}) {
 	reader.FieldsPerRecord = -1
 	var sgn, sort, lineno, edano, lnoeda string
 	var rece [][]string
+	linenum := 0
 	receIdx := make(map[string]int)
 	eda := make(map[string]int)
 	hosei := make(map[string][]string)
@@ -68,8 +70,12 @@ func loadMain(in *os.File, r Callback, fnm string, a []interface{}) {
 		if err == io.EOF {
 			break
 		}
+		linenum++
 		if len(arr) < 3 {
 			continue
+		}
+		if linenum%common.TickLineNum == 0 {
+			fmt.Printf("[loading %d lines...]\n", linenum)
 		}
 		sgn = arr[locSgn]
 		sort = arr[locSort]
@@ -120,6 +126,7 @@ func loadMain(in *os.File, r Callback, fnm string, a []interface{}) {
 	if len(rece) > 0 {
 		r(receSorting(rece, flgJy), fnm, a)
 	}
+	fmt.Printf("[loaded %d lines.]\n", linenum)
 }
 
 func failOnError(err error) {
@@ -130,6 +137,7 @@ func failOnError(err error) {
 
 //Load -- レセファイル１つのロード
 func Load(fnm string, r Callback, a []interface{}) {
+	fmt.Printf("[target:%s start..]\n", fnm)
 	f, err := os.Open(fnm)
 	failOnError(err)
 	defer f.Close()
