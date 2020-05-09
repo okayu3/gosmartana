@@ -51,8 +51,8 @@ func MakeSVMed(one [][]string, fnm string, args []interface{}) int {
 	var arr []string
 	var sort, mnKensaku, ymdB, gend, name, kananame string
 	var ck, iKi, iBan string
+	flgHO := 0
 	cntDis := 0
-	kananame = common.Empty
 	svHandle := args[0].(*os.File)
 	for _, arr = range one {
 		if (arr == nil) || (len(arr) <= 0) {
@@ -72,9 +72,17 @@ func MakeSVMed(one [][]string, fnm string, args []interface{}) int {
 				kananame = arr[rece.RREkananame]
 			}
 		} else if sort == "HO" {
+			flgHO = 1
 			iKi = arr[rece.RHOinsKigo]
 			iBan = arr[rece.RHOinsBango]
 			ck = ckey.Get(iKi, iBan, ymdB, gend, name, kananame)
+		} else if sort == "HO" {
+			if flgHO == 0 {
+				//共通(のちにrefactoringすること)
+				iKi = arr[rece.RKOftn]
+				iBan = arr[rece.RKOrcv]
+				ck = ckey.Get(iKi, iBan, ymdB, gend, name, kananame)
+			}
 		} else if sort == "SY" {
 			cntDis++
 			opSaveSV(svHandle, ck, mnKensaku, cntDis, gend, arr)
