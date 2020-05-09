@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/okayu3/gosmartana/internal/ana"
+	"github.com/okayu3/gosmartana/pkg/ckey"
 	"github.com/okayu3/gosmartana/pkg/rece"
 )
 
@@ -16,6 +17,7 @@ func main() {
 	//makeSVAndThenExpense() //2.192737秒
 	makeExpenseWithSV() //1.280264秒
 	goal := time.Now()
+	ckey.UpdatePersonMst()
 	fmt.Printf("%f秒\n", (goal.Sub(start)).Seconds())
 }
 
@@ -25,6 +27,8 @@ func loadMasters() {
 	fnmMstCd119 := "C:/task/prj/YG01/mst/2020/etc/SYB_MIDDLE_CD119_2013ICD10_NM_202004.csv"
 	fnmMstHB := "C:/task/prj/YG01/mst/2020/h/hb_20200101.txt"
 	ana.LoadDisB(fnmMstB, fnmMstCd119, fnmMstHB)
+	fnmPsnMst := "C:/Users/woodside3/go/output/person.csv"
+	ckey.LoadPersonMst(fnmPsnMst)
 }
 
 func makeSVAndThenExpense() {
