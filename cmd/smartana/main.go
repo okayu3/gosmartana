@@ -10,6 +10,8 @@ import (
 	"github.com/okayu3/gosmartana/pkg/rece"
 )
 
+var mstDir = "C:/task/prj/YG01/mst"
+
 //Main -- smartana main logic
 func main() {
 	loadMasters()
@@ -23,10 +25,10 @@ func main() {
 
 func loadMasters() {
 	//load mst B / cd119
-	fnmMstB := "C:/task/prj/YG01/mst/2020/b/b_20200301.txt"
-	fnmMstCd119 := "C:/task/prj/YG01/mst/2020/etc/SYB_MIDDLE_CD119_2013ICD10_NM_202004.csv"
-	fnmMstHB := "C:/task/prj/YG01/mst/2020/h/hb_20200101.txt"
-	fnmMstSTopic := "C:/task/prj/YG01/mst/2020/D_mst_toseki_go.csv"
+	fnmMstB := mstDir + "/2020/b/b_20200301.txt"
+	fnmMstCd119 := mstDir + "/2020/etc/SYB_MIDDLE_CD119_2013ICD10_NM_202004.csv"
+	fnmMstHB := mstDir + "/2020/h/hb_20200101.txt"
+	fnmMstSTopic := mstDir + "/2020/D_mst_toseki_go.csv"
 	ana.LoadDisB(fnmMstB, fnmMstCd119, fnmMstHB, fnmMstSTopic)
 	fnmPsnMst := "C:/Users/woodside3/go/output/person.csv"
 	ckey.LoadPersonMst(fnmPsnMst)
@@ -38,33 +40,41 @@ func makeSVAndThenExpense() {
 	//fnm := "C:/task/garden/py/smartana/sample01.csv"
 	fnm := "C:/task/garden/py/smartana/sample/11_RECODEINFO_MED.CSV"
 	ofnm := "C:/Users/woodside3/go/output/disease.csv"
-	ofile, _ := os.OpenFile(ofnm, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
+	ofile, _ := os.OpenFile(ofnm, os.O_WRONLY|os.O_CREATE, 0666)
 	defer ofile.Close()
 	rece.Load(fnm, ana.MakeSVMed, []interface{}{ofile})
 
 	//make expense
 	ofnmExp := "C:/Users/woodside3/go/output/expense.csv"
-	ofileExp, _ := os.OpenFile(ofnmExp, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
+	ofileExp, _ := os.OpenFile(ofnmExp, os.O_WRONLY|os.O_CREATE, 0666)
 	defer ofileExp.Close()
 	rece.Load(fnm, ana.MakeExpenseMed, []interface{}{ofileExp})
 
 }
 
 func makeExpenseWithSV() {
-	//make sv
-	//fnm := "C:/task/garden/py/smartana/sample01.csv"
 	fnm := "C:/task/garden/py/smartana/sample/11_RECODEINFO_MED.CSV"
-	ofnm := "C:/Users/woodside3/go/output/disease.csv"
-	ofileSV, _ := os.OpenFile(ofnm, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
+	//fnm := "C:/task/garden/py/smartana/sample01.csv"
+
+	outDir := "C:/Users/woodside3/go/output/"
+	//make sv
+	ofnm := outDir + "disease.csv"
+	ofileSV, _ := os.OpenFile(ofnm, os.O_WRONLY|os.O_CREATE, 0666)
 	defer ofileSV.Close()
 	//make expense
-	ofnmExp := "C:/Users/woodside3/go/output/expense.csv"
-	ofileExp, _ := os.OpenFile(ofnmExp, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
+	ofnmExp := outDir + "expense.csv"
+	ofileExp, _ := os.OpenFile(ofnmExp, os.O_WRONLY|os.O_CREATE, 0666)
 	defer ofileExp.Close()
 	//make toseki and s-topics
-	ofnmTopic := "C:/Users/woodside3/go/output/tosekiTopic.csv"
-	ofileTopic, _ := os.OpenFile(ofnmTopic, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
+	ofnmTopic := outDir + "tosekiTopic.csv"
+	ofileTopic, _ := os.OpenFile(ofnmTopic, os.O_WRONLY|os.O_CREATE, 0666)
 	defer ofileTopic.Close()
+	//make PDMData
+	ohandlesPDM := ana.PreparePDMData(outDir)
 
-	rece.Load(fnm, ana.MakeBasicsMed, []interface{}{ofileExp, ofileSV, ofileTopic})
+	rece.Load(fnm, ana.MakeBasicsMed, []interface{}{ofileExp, ofileSV, ofileTopic, ohandlesPDM})
+	//closing
+	ana.ClosePDMHandle(ohandlesPDM)
+	ana.RunPDM(outDir+"pdm/"+ana.PdmDataMale, mstDir, outDir)
+	ana.RunPDM(outDir+"pdm/"+ana.PdmDataFemale, mstDir, outDir)
 }

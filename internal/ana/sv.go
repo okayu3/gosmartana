@@ -112,7 +112,7 @@ func MakeSVMed(one [][]string, fnm string, args []interface{}) int {
 	return 1
 }
 
-func opSaveSV(svHandle *os.File, ck string, mnKensaku string, cntDis int, gend string, arr []string) {
+func opSaveSV(svHandle *os.File, ck string, mnKensaku string, cntDis int, gend string, arr []string) (string, string) {
 	lineno := arr[2-1]
 	recSeq := arr[3-1]
 	recDsc := arr[4-1]
@@ -145,12 +145,14 @@ func opSaveSV(svHandle *os.File, ck string, mnKensaku string, cntDis int, gend s
 		flgHandw = "1"
 	}
 	gaku := common.Empty
+	sCntDis := strconv.Itoa(cntDis)
 
-	oneSv := strings.Join([]string{ck, mnKensaku, strconv.Itoa(cntDis),
+	oneSv := strings.Join([]string{ck, mnKensaku, sCntDis,
 		lineno, recDsc, recSeq, sybcd, prefix, suffix, cd119, icd10,
 		disnm, flgMain, innDate, tenki, flgDoubt, flgHandw, gend, gaku},
 		common.Comma)
 	svHandle.WriteString(oneSv + "\n")
+	return sCntDis, cd119
 }
 
 func detectSybcd(sybcd, disnm string) (string, string, string, string) {

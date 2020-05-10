@@ -25,6 +25,8 @@ func MakeBasicsMed(one [][]string, fnm string, args []interface{}) int {
 	var jitsuDates, ten string
 	var act, tokki string
 	var ck, iKi, iBan string
+	var sCntDis, icd10 string
+	var aCnt, aIcd10 []string
 	topicCheck := make([]int, cntTopicSorts, cntTopicSorts)
 
 	if one == nil {
@@ -33,6 +35,7 @@ func MakeBasicsMed(one [][]string, fnm string, args []interface{}) int {
 	outHandle := args[0].(*os.File)
 	outHandleSV := args[1].(*os.File)
 	outHandleTopic := args[2].(*os.File)
+	aOutHandlesPDM := args[3].([]*os.File)
 	flgHO := 0
 	cntDis := 0
 
@@ -94,7 +97,9 @@ func MakeBasicsMed(one [][]string, fnm string, args []interface{}) int {
 			}
 		} else if sort == "SY" {
 			cntDis++
-			opSaveSV(outHandleSV, ck, mnKensaku, cntDis, gend, arr)
+			sCntDis, icd10 = opSaveSV(outHandleSV, ck, mnKensaku, cntDis, gend, arr)
+			aCnt = append(aCnt, sCntDis)
+			aIcd10 = append(aIcd10, icd10)
 		} else if sort == "SI" {
 			act = arr[rece.RSIactCd]
 			opCheckActTopic(act, topicCheck)
@@ -111,6 +116,8 @@ func MakeBasicsMed(one [][]string, fnm string, args []interface{}) int {
 		prf, pnt, ircd, irnm, seikyuYm)
 
 	opSaveTosekiAndSTopic(outHandleTopic, ck, mnKensaku, tokki, topicCheck)
+
+	OpSavePDMData(aOutHandlesPDM, mnKensaku, jitsuDates, ten, gend, aCnt, aIcd10)
 	return 1
 }
 
