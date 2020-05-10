@@ -34,3 +34,20 @@ func DivAffix(affix string) (string, string) {
 	}
 	return prefix, suffix
 }
+
+//IsLongCareRece -- 長期レセ判定
+func IsLongCareRece(s string) bool {
+	if s == Empty {
+		return false
+	}
+	len := len(s)
+	w := Empty
+	i := 0
+	for i = 0; i < len-1; i += 2 {
+		w += s[i:i+2] + ","
+	}
+	judge := strings.Contains(w, "02")
+	judge = judge || strings.Contains(w, "06")
+	judge = judge || strings.Contains(w, "16")
+	return judge
+}

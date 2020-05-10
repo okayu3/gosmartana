@@ -26,7 +26,8 @@ func loadMasters() {
 	fnmMstB := "C:/task/prj/YG01/mst/2020/b/b_20200301.txt"
 	fnmMstCd119 := "C:/task/prj/YG01/mst/2020/etc/SYB_MIDDLE_CD119_2013ICD10_NM_202004.csv"
 	fnmMstHB := "C:/task/prj/YG01/mst/2020/h/hb_20200101.txt"
-	ana.LoadDisB(fnmMstB, fnmMstCd119, fnmMstHB)
+	fnmMstSTopic := "C:/task/prj/YG01/mst/2020/D_mst_toseki_go.csv"
+	ana.LoadDisB(fnmMstB, fnmMstCd119, fnmMstHB, fnmMstSTopic)
 	fnmPsnMst := "C:/Users/woodside3/go/output/person.csv"
 	ckey.LoadPersonMst(fnmPsnMst)
 }
@@ -60,6 +61,10 @@ func makeExpenseWithSV() {
 	ofnmExp := "C:/Users/woodside3/go/output/expense.csv"
 	ofileExp, _ := os.OpenFile(ofnmExp, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
 	defer ofileExp.Close()
-	rece.Load(fnm, ana.MakeBasicsMed, []interface{}{ofileExp, ofileSV})
+	//make toseki and s-topics
+	ofnmTopic := "C:/Users/woodside3/go/output/tosekiTopic.csv"
+	ofileTopic, _ := os.OpenFile(ofnmTopic, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
+	defer ofileTopic.Close()
 
+	rece.Load(fnm, ana.MakeBasicsMed, []interface{}{ofileExp, ofileSV, ofileTopic})
 }

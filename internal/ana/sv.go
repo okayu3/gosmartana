@@ -21,8 +21,12 @@ var MstB = make(map[string][]string)
 //MstHB -- HBマスタのdictionary
 var MstHB = make(map[string][]string)
 
+//MstSTopic -- 診療行為に関連するマスタ
+var MstSTopic = make(map[string]map[string]int)
+var wkSTopic map[string]int
+
 //LoadDisB -- bマスタのロード
-func LoadDisB(fnm string, fnmCd119 string, fnmHb string) {
+func LoadDisB(fnm string, fnmCd119 string, fnmHb string, fnmToseki string) {
 	var sybcd, sybnm, icd10, cd119, sybcdPre, sybcdNxt string
 	common.LoadCSV(fnm, func(arr []string, lineno int) {
 		sybcd = arr[3-1]
@@ -42,6 +46,23 @@ func LoadDisB(fnm string, fnmCd119 string, fnmHb string) {
 		sybcdNxt = arr[4-1]
 		sybnm = arr[6-1]
 		MstHB[sybcdPre] = []string{sybcdNxt, sybnm}
+	}, common.ModeCsvSJIS)
+	wkSTopic = nil
+	common.LoadCSV(fnmToseki, func(arr []string, lineno int) {
+		if len(arr) == 1 {
+			if arr[0] == common.Empty {
+				return
+			}
+			kk := strings.TrimSpace(arr[0])
+			if strings.HasPrefix(kk, "[") && strings.HasSuffix(kk, "]") {
+				kk = kk[1 : len(kk)-1]
+				MstSTopic[kk] = make(map[string]int)
+				wkSTopic = MstSTopic[kk]
+			}
+		}
+		if (wkSTopic != nil) && (len(arr) == 2) {
+			wkSTopic[arr[0]] = 1
+		}
 	}, common.ModeCsvSJIS)
 
 }
