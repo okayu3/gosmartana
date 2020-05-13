@@ -48,12 +48,7 @@ func ListUpFiles(root, prefix, suffix string) []string {
 
 //ListUpRece -- path配下(サブディレクトリ含む)、prefix ではじまり、 suffixで終わるファイル一覧を取得
 func ListUpRece(root, suffix string) [][]string {
-	var ans [][]string
-	ans = append(ans, []string{})
-	ans = append(ans, []string{})
-	ans = append(ans, []string{})
-	ans = append(ans, []string{})
-	ans = append(ans, []string{})
+	ans := [][]string{{}, {}, {}, {}, {}}
 	suffix = strings.ToUpper(suffix) + ".CSV"
 	rMed := regexp.MustCompile(`1[_-]REC\S+[_-]MED`)
 	rDpc := regexp.MustCompile(`2[_-]REC\S+[_-]DPC`)

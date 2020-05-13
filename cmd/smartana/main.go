@@ -7,6 +7,7 @@ import (
 
 	"github.com/okayu3/gosmartana/internal/ana"
 	"github.com/okayu3/gosmartana/pkg/ckey"
+	"github.com/okayu3/gosmartana/pkg/common"
 	"github.com/okayu3/gosmartana/pkg/rece"
 )
 
@@ -34,7 +35,7 @@ func loadMasters() {
 	ckey.LoadPersonMst(fnmPsnMst)
 }
 
-func makeSVAndThenExpense() {
+/* func makeSVAndThenExpense() {
 
 	//make sv
 	//fnm := "C:/task/garden/py/smartana/sample01.csv"
@@ -50,11 +51,12 @@ func makeSVAndThenExpense() {
 	defer ofileExp.Close()
 	rece.Load(fnm, ana.MakeExpenseMed, []interface{}{ofileExp})
 
-}
+} */
 
 func makeExpenseWithSV() {
-	fnm := "C:/task/garden/py/smartana/sample/11_RECODEINFO_MED.CSV"
+	//fnm := "C:/task/garden/py/smartana/sample/11_RECODEINFO_MED.CSV"
 	//fnm := "C:/task/garden/py/smartana/sample01.csv"
+	receFnms := common.ListUpRece("C:/task/prj/YG01/sample/rece", common.Empty)
 
 	outDir := "C:/Users/woodside3/go/output/"
 	//make sv
@@ -72,7 +74,8 @@ func makeExpenseWithSV() {
 	//make PDMData
 	ohandlesPDM := ana.PreparePDMData(outDir)
 
-	rece.Load(fnm, ana.MakeBasicsMed, []interface{}{ofileExp, ofileSV, ofileTopic, ohandlesPDM})
+	rece.LoadArr(receFnms[0], ana.MakeBasicsMed, []interface{}{ofileExp, ofileSV, ofileTopic, ohandlesPDM})
+	//rece.Load(fnm, ana.MakeBasicsMed, []interface{}{ofileExp, ofileSV, ofileTopic, ohandlesPDM})
 	//closing
 	ana.ClosePDMHandle(ohandlesPDM)
 	ana.RunPDM(outDir+"pdm/"+ana.PdmDataMale, mstDir, outDir)
