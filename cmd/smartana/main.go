@@ -94,4 +94,5 @@ func makeExpenseWithSV() {
 	ana.ClosePDMHandle(ohandlesPDM)
 	ana.RunPDM(outDir+"pdm/"+ana.PdmDataMale, mstDir, outDir)
 	ana.RunPDM(outDir+"pdm/"+ana.PdmDataFemale, mstDir, outDir)
+	ana.OpAfterPDM(outDir)
 }

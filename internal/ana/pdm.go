@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/okayu3/gosmartana/pkg/common"
+	"github.com/okayu3/gosmartana/pkg/rece"
 )
 
 var dicHst = make(map[string]([]float64))
@@ -374,13 +375,39 @@ func OpSavePDMData(aOutHandlesPDM [](*os.File), mnKensaku, jitsuDates, ten, gend
 	outHandleIcd10.WriteString(oneIcd10 + "\n")
 }
 
-/*
+//OpAfterPDM -- operation after PDM
 func OpAfterPDM(outdir string) {
 	fnmDisseq := outdir + "pdm/pdm_disseq.csv"
-	common.LoadCSV(fnmDisseq, func(arr []string, lineno int) {
-
-	}, common.ModeCsvUTF8)
-
+	dicSeq := make(map[string]string)
+	common.LoadByLine(fnmDisseq, func(s string, lineno int) {
+		a := strings.SplitN(s, ",", 4)
+		if len(a) == 4 {
+			mnKensaku := a[0]
+			dicSeq[mnKensaku] = a[3]
+		}
+	}, common.ModeSJIS)
 	fnmsTensu := common.ListUpFiles(outdir+"pdm/result/", "ATensu_", ".csv")
-
-} */
+	dicGakuSV := make(map[string]string)
+	common.LoadCSVArr(fnmsTensu, func(arr []string, lineno int) {
+		var ten string
+		mnKensaku := arr[0]
+		seqs := strings.Split(dicSeq[mnKensaku], ",")
+		for i := 0; i < len(seqs); i++ {
+			ten = arr[3+i]
+			dicGakuSV[mnKensaku+common.Collon+seqs[i]] =
+				fmt.Sprintf("%d", common.Atoi(ten, 0)*rece.GakuForTen)
+		}
+	}, common.ModeCsvSJIS)
+	fnmDisease := outdir + "disease.csv"
+	fnmDiseaseOut := outdir + "diseasePdm.csv"
+	ofileDiseaseOut, _ := os.OpenFile(fnmDiseaseOut, os.O_WRONLY|os.O_CREATE, 0666)
+	defer ofileDiseaseOut.Close()
+	common.LoadCSV(fnmDisease, func(arr []string, lineno int) {
+		mnKensaku := arr[1]
+		seq := arr[2]
+		kk := mnKensaku + common.Collon + seq
+		arr = append(arr, dicGakuSV[kk])
+		oneline := strings.Join(arr, common.Comma)
+		ofileDiseaseOut.WriteString(oneline + "\n")
+	}, common.ModeCsvUTF8)
+}

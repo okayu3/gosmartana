@@ -200,11 +200,16 @@ func opSaveGeneric(outHandle *os.File, ck, mnKensaku string,
 		yjcd, ok = mstDrgYjcd[drgCd]
 		grpcd = common.Empty
 		seibuncd = common.Empty
-		if !ok {
+		if !ok || yjcd == common.Empty {
 			yjcd = common.Empty
 		} else {
-			grpcd = yjcd[0:9]
-			seibuncd = yjcd[9:11]
+			if len(yjcd) < 11 {
+				//log.Logger("what yjcd" + yjcd)
+				fmt.Println("what yjcd" + yjcd)
+			} else {
+				grpcd = yjcd[0:9]
+				seibuncd = yjcd[9:11]
+			}
 		}
 		w = append(w, drgCd, grpcd, seibuncd, nyugai)
 		for _, vv := range v {

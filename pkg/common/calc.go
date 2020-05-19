@@ -40,6 +40,15 @@ func Atoi(s string, defaultvalue int) int {
 	return ans
 }
 
+//Atof -- atof
+func Atof(s string, defaultvalue float64) float64 {
+	ans, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return defaultvalue
+	}
+	return ans
+}
+
 // RoundI : 小数点以下四捨五入
 func RoundI(f float64) int {
 	return int(math.Floor(f + 0.5))

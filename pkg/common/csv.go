@@ -1,6 +1,7 @@
 package common
 
 import (
+	"bufio"
 	"encoding/csv"
 	"fmt"
 	"io"
@@ -19,11 +20,17 @@ const (
 	ModeTsvSJIS = 3
 	ModeTsvUTF8 = 4
 	ModeTsvEUC  = 5
+	ModeSJIS    = 0
+	ModeUTF8    = 1
+	ModeEUC     = 2
 	TickLineNum = 100000
 )
 
 //CsvCallback -- type of callback for CSV operation
 type CsvCallback func([]string, int)
+
+//LineCallback -- type of callback for LineReader operation
+type LineCallback func(string, int)
 
 func failOnError(err error) {
 	if err != nil {
@@ -64,6 +71,7 @@ func loadCsvMain(in *os.File, r CsvCallback, mode int) {
 
 //LoadCSV -- reading one csv file
 func LoadCSV(fnm string, r CsvCallback, mode int) {
+	fmt.Printf("[target:%s start..]\n", fnm)
 	f, err := os.Open(fnm)
 	failOnError(err)
 	defer f.Close()
@@ -74,5 +82,35 @@ func LoadCSV(fnm string, r CsvCallback, mode int) {
 func LoadCSVArr(fnms []string, r CsvCallback, mode int) {
 	for _, fnm := range fnms {
 		LoadCSV(fnm, r, mode)
+	}
+}
+
+//LoadByLineArr -- reading text files by line
+func LoadByLineArr(fnms []string, r LineCallback, mode int) {
+	for _, fnm := range fnms {
+		LoadByLine(fnm, r, mode)
+	}
+}
+
+//LoadByLine -- 1行ずつ読み込むパターン
+func LoadByLine(fnm string, r LineCallback, mode int) {
+	fmt.Printf("[target:%s start..]\n", fnm)
+	f, err := os.Open(fnm)
+	failOnError(err)
+	defer f.Close()
+	var scanner *bufio.Scanner
+	if mode == ModeSJIS {
+		scanner = bufio.NewScanner(transform.NewReader(f, japanese.ShiftJIS.NewDecoder()))
+	} else if mode == ModeEUC {
+		scanner = bufio.NewScanner(transform.NewReader(f, japanese.EUCJP.NewDecoder()))
+	} else {
+		scanner = bufio.NewScanner(f)
+	}
+	lineno := 0
+	var oneline string
+	for scanner.Scan() {
+		lineno++
+		oneline = scanner.Text()
+		r(oneline, lineno)
 	}
 }
