@@ -31,8 +31,16 @@ func loadMasters() {
 	fnmMstHB := mstDir + "/2020/h/hb_20200101.txt"
 	fnmMstSTopic := mstDir + "/2020/D_mst_toseki_go.csv"
 	ana.LoadDisB(fnmMstB, fnmMstCd119, fnmMstHB, fnmMstSTopic)
+	//Person Mst
 	fnmPsnMst := "C:/Users/woodside3/go/output/person.csv"
 	ckey.LoadPersonMst(fnmPsnMst)
+	//generic mst
+	fnmAnyDrg := mstDir + "/2020/etc/generic/A015_01_mst_any_yakka_period.csv"
+	fnmGeneFlg := mstDir + "/2020/etc/generic/A015_01_mst_genestat_period.csv"
+	fnmCheap := mstDir + "/2020/etc/generic/A015_01_mst_cheapest_period_202004.csv"
+	fnmExpensv := mstDir + "/2020/etc/generic/A015_01_mst_expensive_period_202004.csv"
+	ana.LoadMstGeneric(fnmAnyDrg, fnmGeneFlg, fnmCheap, fnmExpensv)
+
 }
 
 /* func makeSVAndThenExpense() {
@@ -73,8 +81,14 @@ func makeExpenseWithSV() {
 	defer ofileTopic.Close()
 	//make PDMData
 	ohandlesPDM := ana.PreparePDMData(outDir)
+	//make generic
+	ofnmGene := outDir + "generic.csv"
+	ofileGene, _ := os.OpenFile(ofnmGene, os.O_WRONLY|os.O_CREATE, 0666)
 
-	rece.LoadArr(receFnms[0], ana.MakeBasicsMed, []interface{}{ofileExp, ofileSV, ofileTopic, ohandlesPDM})
+	rece.LoadArr(receFnms[0], ana.MakeBasicsMED, []interface{}{ofileExp, ofileSV, ofileTopic, ohandlesPDM, ofileGene})
+	rece.LoadArr(receFnms[1], ana.MakeBasicsDPC, []interface{}{ofileExp, ofileSV, ofileTopic, ohandlesPDM, ofileGene})
+	rece.LoadArr(receFnms[2], ana.MakeBasicsDEN, []interface{}{ofileExp, ofileSV, ofileTopic, ohandlesPDM, ofileGene})
+	rece.LoadArr(receFnms[3], ana.MakeBasicsPHA, []interface{}{ofileExp, ofileGene})
 	//rece.Load(fnm, ana.MakeBasicsMed, []interface{}{ofileExp, ofileSV, ofileTopic, ohandlesPDM})
 	//closing
 	ana.ClosePDMHandle(ohandlesPDM)

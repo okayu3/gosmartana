@@ -65,3 +65,12 @@ func Ceil(f float64, places int) float64 {
 	}
 	return math.Floor(wk) / shift
 }
+
+// Round5sha 五捨五超入
+func Round5sha(f float64) float64 {
+	ans := math.Trunc(f)
+	if f-ans > 0.5 {
+		ans = ans + 1.0
+	}
+	return ans
+}

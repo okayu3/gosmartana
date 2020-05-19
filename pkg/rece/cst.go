@@ -2,6 +2,7 @@ package rece
 
 //constants for rece-processing
 const (
+	GakuForTen     = 10.0
 	RSort          = 2 + 1
 	RMNkensaku     = 6
 	RMNkensakuDen  = 7
@@ -27,6 +28,9 @@ const (
 	RREinnDate     = 2 + 9
 	RREkarte       = 2 + 14
 	RREkananame    = 2 + 37
+	RREphakananame = 2 + 42
+	RREdpckananame = 2 + 29
+	RREdenkananame = 2 + 26
 	RREtokki       = 2 + 12
 	RREtokkiDen    = 2 + 14
 	RREtokkiPha    = 2 + 9

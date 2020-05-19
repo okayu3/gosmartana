@@ -46,7 +46,7 @@ func ListUpFiles(root, prefix, suffix string) []string {
 	return ans
 }
 
-//ListUpRece -- path配下(サブディレクトリ含む)、prefix ではじまり、 suffixで終わるファイル一覧を取得
+//ListUpRece -- path配下(サブディレクトリ含む)、suffixで終わる レセプトファイル一覧を取得
 func ListUpRece(root, suffix string) [][]string {
 	ans := [][]string{{}, {}, {}, {}, {}}
 	suffix = strings.ToUpper(suffix) + ".CSV"

@@ -373,3 +373,14 @@ func OpSavePDMData(aOutHandlesPDM [](*os.File), mnKensaku, jitsuDates, ten, gend
 	}
 	outHandleIcd10.WriteString(oneIcd10 + "\n")
 }
+
+/*
+func OpAfterPDM(outdir string) {
+	fnmDisseq := outdir + "pdm/pdm_disseq.csv"
+	common.LoadCSV(fnmDisseq, func(arr []string, lineno int) {
+
+	}, common.ModeCsvUTF8)
+
+	fnmsTensu := common.ListUpFiles(outdir+"pdm/result/", "ATensu_", ".csv")
+
+} */
