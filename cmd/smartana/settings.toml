@@ -1,0 +1,11 @@
+[MasterPath]
+MST_DIR = "C:/task/prj/YG01/mst/"
+
+[OutputPath]
+OUT_DIR = "C:/Users/woodside3/go/output/"
+
+[SettingsPath]
+SETTING_DIR = "C:/Users/woodside3/go/settings/"
+
+[RecePath]
+RECE_DIR = "C:/task/prj/YG01/sample/rece/"

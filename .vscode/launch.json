@@ -9,7 +9,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/smartana",
+            "program": "${workspaceFolder}/cmd/smartanalogic",
             "env": {},
             "args": []
         }

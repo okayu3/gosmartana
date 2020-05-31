@@ -54,3 +54,52 @@ func YmW2g(s string) string {
 		return strconv.Itoa(i - 10000 + 186700)
 	}
 }
+
+//AgeAt -- atymdの段階での生年月日ymd_b の年齢
+func AgeAt(ymdB, atYmd string) int {
+	var i, j int
+	var err0, err1 error
+	i, err0 = strconv.Atoi(ymdB)
+	j, err1 = strconv.Atoi(atYmd)
+	if (err0 != nil) || (err1 != nil) {
+		return -1
+	}
+	age := (j - i) / 10000
+	return age
+}
+
+//AnnualAtYmd -- atymd の年度。ただし年度開始を 4/1とする
+func AnnualAtYmd(atYmd string) int {
+	var i int
+	var err0 error
+	i, err0 = strconv.Atoi(atYmd)
+	if err0 != nil {
+		return -1
+	}
+	//year
+	y := i / 10000
+	//month
+	m := (((i/100)%100 - 1) % 12) + 1
+	if m < 4 {
+		y--
+	}
+	return y
+}
+
+//AnnualAtYm -- atym の年度。ただし年度開始を 4/1とする
+func AnnualAtYm(atYm string) int {
+	var i int
+	var err0 error
+	i, err0 = strconv.Atoi(atYm)
+	if err0 != nil {
+		return -1
+	}
+	//year
+	y := i / 100
+	//month
+	m := ((i%100 - 1) % 12) + 1
+	if m < 4 {
+		y--
+	}
+	return y
+}

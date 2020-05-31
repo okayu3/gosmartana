@@ -56,6 +56,8 @@ func ListUpRece(root, suffix string) [][]string {
 	rPha := regexp.MustCompile(`4[_-]REC\S+[_-]PHA`)
 	rNur := regexp.MustCompile(`5[_-]REC\S+[_-]NUR`)
 
+	root = strings.TrimRight(root, "/")
+
 	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)

@@ -8,3 +8,6 @@ const Collon = ":"
 
 //Comma is comma
 const Comma = ","
+
+//CrLf is return code
+const CrLf = "\r\n"
