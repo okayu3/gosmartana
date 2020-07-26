@@ -8,6 +8,12 @@ import (
 	"github.com/okayu3/gosmartana/pkg/rece"
 )
 
+//MstB -- disease Mst
+var MstB = make(map[string][]string)
+
+//MstMiz -- Mizushima-Group DisGroup Definition
+var MstMiz = make(map[string]map[string]bool)
+
 //DicPop  -- Population of Age Range By 5years
 var DicPop = make(map[string]map[int]int)
 
@@ -19,12 +25,47 @@ var DicExp = make(map[string][]string)
 
 //RunLogic -- logic running
 //  param: outDir := "C:/Users/woodside3/go/output/"
-func RunLogic(outDir string, settingDir string) {
+func RunLogic(mstDir string, outDir string, settingDir string) {
+	loadMstB(mstDir + "2020/b/b_20200301.txt")
+	loadMstMizushima(mstDir + "mst_mizushima.csv")
 	loadPopulation(settingDir + "setting_population.csv")
 	loadPerson(outDir + "person.csv")
+	preLoadTosekiAndTopics(outDir + "tosekiTopic.csv")
 	loadExpense(outDir + "expense.csv")
 	loadDisPdm(outDir + "diseasePdm.csv")
+	loadTosekiAndTopics(outDir + "tosekiTopic.csv")
 	opSummary(outDir)
+}
+
+func loadMstB(fnmB string) {
+	if !common.FileExists(fnmB) {
+		log.Println("Mizushima DisGroup Mst Not Found:" + fnmB)
+		return
+	}
+	common.LoadCSV(fnmB, func(a []string, lineno int) {
+		sybcd := a[3-1]
+		sybnm := a[6-1]
+		MstB[sybcd] = []string{sybnm}
+	}, common.ModeCsvSJIS)
+}
+func loadMstMizushima(fnmMiz string) {
+	if !common.FileExists(fnmMiz) {
+		log.Println("Mizushima DisGroup Mst Not Found:" + fnmMiz)
+		return
+	}
+	common.LoadCSV(fnmMiz, func(a []string, lineno int) {
+		grCd1 := a[1-1]
+		grCd2 := a[2-1]
+		sybCd := a[6-1]
+		if _, ok := MstMiz[grCd1]; !ok {
+			MstMiz[grCd1] = make(map[string]bool)
+		}
+		if _, ok := MstMiz[grCd2]; !ok {
+			MstMiz[grCd2] = make(map[string]bool)
+		}
+		MstMiz[grCd1][sybCd] = true
+		MstMiz[grCd2][sybCd] = true
+	}, common.ModeCsvSJIS)
 }
 
 func loadPopulation(fnmPop string) {
@@ -84,13 +125,15 @@ func loadExpense(fnmExpense string) {
 		ten := a[9-1]
 		sort := a[10-1]
 		sinryoYm := a[11-1]
+		seikyuYm := a[17-1]
 
 		gaku := common.Atoi(ten, 0) * rece.GakuForTen
-		DicExp[mnKensaku] = []string{ck, honn, sinryoYm, sort}
+		DicExp[mnKensaku] = []string{ck, honn, sinryoYm, sort, seikyuYm}
 
-		loadingExpenseC1P1V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDates, gaku)
-		loadingExpenseC1P2V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDates, gaku)
-		loadingExpenseC1P3V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDates, gaku)
+		loadingExpenseC1P1V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDates, seikyuYm, gaku)
+		loadingExpenseC1P2V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDates, seikyuYm, gaku)
+		loadingExpenseC1P3V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDates, seikyuYm, gaku)
+		loadingExpenseC2P6V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDates, seikyuYm, gaku)
 
 	}, common.ModeCsvUTF8)
 }
@@ -103,6 +146,7 @@ func loadDisPdm(fnmDisPdm string) {
 	common.LoadCSV(fnmDisPdm, func(a []string, lineno int) {
 		ck := a[1-1]
 		mnKensaku := a[2-1]
+		sybcd := a[7-1]
 		cd119 := a[10-1]
 		gaku := common.Atoi(a[20-1], 0)
 		if gaku == 0 {
@@ -111,6 +155,44 @@ func loadDisPdm(fnmDisPdm string) {
 		//for 001_002_001 From Here
 		loadingDisPdmC1P2V1(ck, mnKensaku, cd119, gaku)
 		//for 001_002_001 Till Here
+		loadingDisPdmC2P6V1(ck, mnKensaku, cd119, sybcd, gaku)
+
+	}, common.ModeCsvUTF8)
+}
+
+func preLoadTosekiAndTopics(fnmTosekiTopic string) {
+	if !common.FileExists(fnmTosekiTopic) {
+		log.Println("Toseki & Topics Data Not Found:" + fnmTosekiTopic)
+		return
+	}
+	common.LoadCSV(fnmTosekiTopic, func(a []string, lineno int) {
+		ck := a[1-1]
+		flgToseki := a[3-1]
+		preLoadingTosekiAndTopicsC2P6V1(ck, flgToseki)
+	}, common.ModeCsvUTF8)
+}
+
+func loadTosekiAndTopics(fnmTosekiTopic string) {
+	if !common.FileExists(fnmTosekiTopic) {
+		log.Println("Toseki & Topics Data Not Found:" + fnmTosekiTopic)
+		return
+	}
+	common.LoadCSV(fnmTosekiTopic, func(a []string, lineno int) {
+		ck := a[1-1]
+		mnKensaku := a[2-1]
+		flgToseki := a[3-1]
+		flgInsulin := a[6-1]
+		flgMngDiabetes := a[7-1]
+		flgMngBP := a[8-1]
+		flgMngFat := a[9-1]
+		flgSmoking := a[10-1]
+		flgYoboToseki := a[11-1]
+		flgTestHbA1c := a[12-1]
+		flgTestFat := a[13-1]
+		//for 002_007_001 From Here
+		loadingTosekiTopicC2P6V1(ck, mnKensaku, flgToseki, flgInsulin, flgMngDiabetes, flgMngBP, flgMngFat, flgSmoking, flgYoboToseki, flgTestHbA1c, flgTestFat)
+		loadingTosekiTopicC2P7V1(ck, mnKensaku, flgToseki, flgInsulin, flgMngDiabetes, flgMngBP, flgMngFat, flgSmoking, flgYoboToseki, flgTestHbA1c, flgTestFat)
+		//for 002_007_001 Till Here
 	}, common.ModeCsvUTF8)
 }
 
@@ -121,6 +203,8 @@ func opSummary(outDir string) {
 	opSummaryC1P1V1(logicOutdir)
 	opSummaryC1P2V1(logicOutdir)
 	opSummaryC1P3V1(logicOutdir)
+	opSummaryC2P6V1(logicOutdir)
+	opSummaryC2P7V1(logicOutdir)
 }
 
 func calcAgeRange(ymdB, sinryoYm string) int {
@@ -133,4 +217,21 @@ func calcAgeRange(ymdB, sinryoYm string) int {
 	}
 	ageRange := (age / 5) * 5
 	return ageRange
+}
+
+func calcReceAnnual(seikyuYm string) string {
+	var i int
+	var err0 error
+	i, err0 = strconv.Atoi(seikyuYm)
+	if err0 != nil {
+		return "1900"
+	}
+	//year
+	y := i / 100
+	//month
+	m := ((i%100 - 1) % 12) + 1
+	if m < 5 {
+		y--
+	}
+	return strconv.Itoa(y)
 }

@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-	_, outDir, settingDir := loadSettings()
-	logic.RunLogic(outDir, settingDir)
+	mstDir, outDir, settingDir := loadSettings()
+	logic.RunLogic(mstDir, outDir, settingDir)
 }
 
 func loadSettings() (string, string, string) {

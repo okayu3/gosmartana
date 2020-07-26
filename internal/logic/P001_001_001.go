@@ -12,13 +12,19 @@ import (
 )
 
 //dicC1P1V1
-var dicC1P1V1 = make(map[string][]map[string]int)
+var dicC1P1V1 = make(map[string]map[string][]map[string]int)
 
-func loadingExpenseC1P1V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDates string, gaku int) {
+func loadingExpenseC1P1V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDates, seikyuYm string, gaku int) {
 	db, okA := DicPsn[ck]
 	if !okA {
 		return
 	}
+	ann := calcReceAnnual(seikyuYm)
+	if _, ok := dicC1P1V1[ann]; !ok {
+		dicC1P1V1[ann] = make(map[string][]map[string]int)
+	}
+	d := dicC1P1V1[ann]
+
 	gend := db[1-1]
 	kk := []string{"0", gend, honn + ":0", honn + ":" + gend}
 	ss := "99"
@@ -36,19 +42,24 @@ func loadingExpenseC1P1V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDate
 		ss = "3"
 	}
 	for _, k := range kk {
-		if _, ok := dicC1P1V1[k]; !ok {
-			dicC1P1V1[k] = append(dicC1P1V1[k],
+		if _, ok := d[k]; !ok {
+			d[k] = append(d[k],
 				make(map[string]int), make(map[string]int),
 				make(map[string]int), make(map[string]int))
 		}
-		dicC1P1V1[k][0][ss]++
-		dicC1P1V1[k][1][ss] += common.Atoi(jitsuDates, 0)
-		dicC1P1V1[k][2][ss] += gaku
+		d[k][0][ss]++
+		d[k][1][ss] += common.Atoi(jitsuDates, 0)
+		d[k][2][ss] += gaku
 	}
 }
 
 func opSummaryC1P1V1(logicOutdir string) {
-	ofnm := logicOutdir + "Result_C1P1V1.csv"
+	for ann := range dicC1P2V1 {
+		opSummaryC1P1V1Main(ann, logicOutdir)
+	}
+}
+func opSummaryC1P1V1Main(ann, logicOutdir string) {
+	ofnm := logicOutdir + "Result_C1P1V1_" + ann + ".csv"
 	oHandle, _ := os.OpenFile(ofnm, os.O_WRONLY|os.O_CREATE, 0666)
 	defer oHandle.Close()
 	writer := bufio.NewWriter(transform.NewWriter(oHandle, japanese.ShiftJIS.NewEncoder()))
@@ -67,7 +78,7 @@ func opSummaryC1P1V1(logicOutdir string) {
 		for i := 0; i < 3; i++ {
 			wk := []string{srtDsc[i]}
 			for _, aa := range as {
-				d, ok := dicC1P1V1[pg][i][aa]
+				d, ok := dicC1P1V1[ann][pg][i][aa]
 				if !ok {
 					wk = append(wk, "0")
 				} else {

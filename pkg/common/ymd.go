@@ -14,10 +14,13 @@ func YmdW2g(s string) string {
 	var i int
 	var err error
 	i, err = strconv.Atoi(s)
-	if (err != nil) || (i < 1010101) || (i > 9999999) {
+	if (err != nil) || (i < 1010101) {
 		return Empty
 	}
-	if i > 5000000 {
+	if i > 9999999 {
+		//初めから西暦のYMDで 来ている
+		return s
+	} else if i > 5000000 {
 		return strconv.Itoa(i - 5000000 + 20180000)
 	} else if i > 4000000 {
 		return strconv.Itoa(i - 4000000 + 19880000)
@@ -39,10 +42,13 @@ func YmW2g(s string) string {
 	var i int
 	var err error
 	i, err = strconv.Atoi(s)
-	if (err != nil) || (i < 10101) || (i > 99999) {
+	if (err != nil) || (i < 10101) {
 		return Empty
 	}
-	if i > 50000 {
+	if i > 99999 {
+		//初めから西暦のYMで 来ている
+		return s
+	} else if i > 50000 {
 		return strconv.Itoa(i - 50000 + 201800)
 	} else if i > 40000 {
 		return strconv.Itoa(i - 40000 + 198800)

@@ -11,14 +11,20 @@ import (
 	"golang.org/x/text/transform"
 )
 
-//dicC1P3V1
-var dicC1P3V1 = make(map[string]map[int][]int)
+//dicC1P3V1 // annual -- kbn -- agerange -- [gakuidx] gaku
+var dicC1P3V1 = make(map[string]map[string]map[int][]int)
 
-func loadingExpenseC1P3V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDates string, gaku int) {
+func loadingExpenseC1P3V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDates, seikyuYm string, gaku int) {
 	db, okA := DicPsn[ck]
 	if !okA {
 		return
 	}
+	ann := calcReceAnnual(seikyuYm)
+	if _, ok2 := dicC1P3V1[ann]; !ok2 {
+		dicC1P3V1[ann] = make(map[string]map[int][]int)
+	}
+	d := dicC1P3V1[ann]
+
 	gend := db[1-1]
 	ymdB := db[2-1]
 	ageRange := calcAgeRange(ymdB, sinryoYm)
@@ -30,22 +36,27 @@ func loadingExpenseC1P3V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDate
 	}
 	kk := []string{"0", gend, honn + ":0", honn + ":" + gend}
 	for _, k := range kk {
-		if _, ok := dicC1P3V1[k]; !ok {
-			dicC1P3V1[k] = make(map[int][]int)
+		if _, ok := d[k]; !ok {
+			d[k] = make(map[int][]int)
 		}
-		if _, ok := dicC1P3V1[k][ageRange]; !ok {
-			dicC1P3V1[k][ageRange] = []int{0, 0, 0}
+		if _, ok := d[k][ageRange]; !ok {
+			d[k][ageRange] = []int{0, 0, 0}
 		}
-		if _, ok := dicC1P3V1[k][-5]; !ok {
-			dicC1P3V1[k][-5] = []int{0, 0, 0}
+		if _, ok := d[k][-5]; !ok {
+			d[k][-5] = []int{0, 0, 0}
 		}
-		dicC1P3V1[k][ageRange][gakuIdx] += gaku
-		dicC1P3V1[k][-5][gakuIdx] += gaku
+		d[k][ageRange][gakuIdx] += gaku
+		d[k][-5][gakuIdx] += gaku
 	}
 }
 
 func opSummaryC1P3V1(logicOutdir string) {
-	ofnm := logicOutdir + "Result_C1P3V1.csv"
+	for ann := range dicC1P3V1 {
+		opSummaryC1P3V1Main(ann, logicOutdir)
+	}
+}
+func opSummaryC1P3V1Main(ann, logicOutdir string) {
+	ofnm := logicOutdir + "Result_C1P3V1_" + ann + ".csv"
 	oHandle, _ := os.OpenFile(ofnm, os.O_WRONLY|os.O_CREATE, 0666)
 	defer oHandle.Close()
 	writer := bufio.NewWriter(transform.NewWriter(oHandle, japanese.ShiftJIS.NewEncoder()))
@@ -65,7 +76,7 @@ func opSummaryC1P3V1(logicOutdir string) {
 			if !ok0 {
 				pop = 0
 			}
-			r1, ok1 := dicC1P3V1[pg][ageRange]
+			r1, ok1 := dicC1P3V1[ann][pg][ageRange]
 			wk := []int{ageRange}
 			if !ok1 {
 				wk = append(wk, pop, 0, 0, 0, 0, 0, 0, 0, 0, 0)

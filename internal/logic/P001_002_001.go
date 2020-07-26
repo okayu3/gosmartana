@@ -11,10 +11,10 @@ import (
 	"golang.org/x/text/transform"
 )
 
-//dicC1P2V1
-var dicC1P2V1 = make(map[string]map[int]map[string]int)
+//dicC1P2V1 // annual // kbn // agerange // cd19 // gaku
+var dicC1P2V1 = make(map[string]map[string]map[int]map[string]int)
 
-func loadingExpenseC1P2V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDates string, gaku int) {
+func loadingExpenseC1P2V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDates, seikyuYm string, gaku int) {
 	if sort != "歯科" {
 		return
 	}
@@ -30,6 +30,13 @@ func loadingDisPdmC1P2V1(ck, mnKensaku, cd119 string, gaku int) {
 	honn := da[2-1]
 	sinryoYm := da[3-1]
 	sort := da[4-1]
+	seikyuYm := da[5-1]
+	ann := calcReceAnnual(seikyuYm)
+	if _, ok2 := dicC1P2V1[ann]; !ok2 {
+		dicC1P2V1[ann] = make(map[string]map[int]map[string]int)
+	}
+	d := dicC1P2V1[ann]
+
 	gend := db[1-1]
 	ymdB := db[2-1]
 	ageRange := calcAgeRange(ymdB, sinryoYm)
@@ -50,22 +57,28 @@ func loadingDisPdmC1P2V1(ck, mnKensaku, cd119 string, gaku int) {
 	}
 	kk := []string{"0", gend, honn + ":0", honn + ":" + gend}
 	for _, k := range kk {
-		if _, ok := dicC1P2V1[k]; !ok {
-			dicC1P2V1[k] = make(map[int]map[string]int)
+		if _, ok := d[k]; !ok {
+			d[k] = make(map[int]map[string]int)
 		}
-		if _, ok := dicC1P2V1[k][ageRange]; !ok {
-			dicC1P2V1[k][ageRange] = make(map[string]int)
+		if _, ok := d[k][ageRange]; !ok {
+			d[k][ageRange] = make(map[string]int)
 		}
-		if _, ok := dicC1P2V1[k][-5]; !ok {
-			dicC1P2V1[k][-5] = make(map[string]int)
+		if _, ok := d[k][-5]; !ok {
+			d[k][-5] = make(map[string]int)
 		}
-		dicC1P2V1[k][ageRange][cd19] += gaku
-		dicC1P2V1[k][-5][cd19] += gaku
+		d[k][ageRange][cd19] += gaku
+		d[k][-5][cd19] += gaku
 	}
 }
 
 func opSummaryC1P2V1(logicOutdir string) {
-	ofnm := logicOutdir + "Result_C1P2V1.csv"
+	for ann := range dicC1P2V1 {
+		opSummaryC1P2V1Main(ann, logicOutdir)
+	}
+}
+
+func opSummaryC1P2V1Main(ann, logicOutdir string) {
+	ofnm := logicOutdir + "Result_C1P2V1_" + ann + ".csv"
 	oHandle, _ := os.OpenFile(ofnm, os.O_WRONLY|os.O_CREATE, 0666)
 	defer oHandle.Close()
 	writer := bufio.NewWriter(transform.NewWriter(oHandle, japanese.ShiftJIS.NewEncoder()))
@@ -88,7 +101,7 @@ func opSummaryC1P2V1(logicOutdir string) {
 		writer.WriteString("年齢," + strings.Join(dsDsc, common.Comma) + common.CrLf)
 		for i := -1; i <= 14; i++ {
 			ageRange := i * 5
-			r1, ok1 := dicC1P2V1[pg][ageRange]
+			r1, ok1 := dicC1P2V1[ann][pg][ageRange]
 			wk := []string{strconv.Itoa(ageRange)}
 			if !ok1 {
 				for range dsFlg {
