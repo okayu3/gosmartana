@@ -148,14 +148,14 @@ func loadDisPdm(fnmDisPdm string) {
 		mnKensaku := a[2-1]
 		sybcd := a[7-1]
 		cd119 := a[10-1]
+		flgDoubt := a[17-1]
 		gaku := common.Atoi(a[20-1], 0)
 		if gaku == 0 {
 			return
 		}
-		//for 001_002_001 From Here
 		loadingDisPdmC1P2V1(ck, mnKensaku, cd119, gaku)
-		//for 001_002_001 Till Here
-		loadingDisPdmC2P6V1(ck, mnKensaku, cd119, sybcd, gaku)
+		loadingDisPdmC2P5V1(ck, mnKensaku, cd119, sybcd, flgDoubt, gaku)
+		loadingDisPdmC2P6V1(ck, mnKensaku, cd119, sybcd, flgDoubt, gaku)
 
 	}, common.ModeCsvUTF8)
 }
@@ -203,6 +203,7 @@ func opSummary(outDir string) {
 	opSummaryC1P1V1(logicOutdir)
 	opSummaryC1P2V1(logicOutdir)
 	opSummaryC1P3V1(logicOutdir)
+	opSummaryC2P5V1(logicOutdir)
 	opSummaryC2P6V1(logicOutdir)
 	opSummaryC2P7V1(logicOutdir)
 }

@@ -61,7 +61,7 @@ func loadingExpenseC2P6V1(ck, mnKensaku, sort, nyugai, honn, sinryoYm, jitsuDate
 	dicC2P6V1PatCost[ann][ck][idx] += gaku
 }
 
-func loadingDisPdmC2P6V1(ck, mnKensaku, cd119, sybcd string, gaku int) {
+func loadingDisPdmC2P6V1(ck, mnKensaku, cd119, sybcd, flgDoubt string, gaku int) {
 	da, okA := DicExp[mnKensaku]
 	if !okA {
 		return
@@ -100,7 +100,10 @@ func loadingDisPdmC2P6V1(ck, mnKensaku, cd119, sybcd string, gaku int) {
 			continue
 		}
 		if _, ok := MstMiz[m][sybcd]; ok {
-			d[idx] = true
+			//疑い病名でなければ
+			if flgDoubt != "1" {
+				d[idx] = true
+			}
 			flg++
 		}
 	}
