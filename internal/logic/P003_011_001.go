@@ -60,7 +60,7 @@ func opSummaryC3P11V1(logicOutdir string) {
 
 func opSummaryC3P11V1Main(ann, logicOutdir string) {
 	ofnm := logicOutdir + "Result_C3P11V1_" + ann + ".csv"
-	oHandle, _ := os.OpenFile(ofnm, os.O_WRONLY|os.O_CREATE, 0666)
+	oHandle, _ := os.Create(ofnm)
 	defer oHandle.Close()
 	writer := bufio.NewWriter(transform.NewWriter(oHandle, japanese.ShiftJIS.NewEncoder()))
 
@@ -137,11 +137,14 @@ func opSummaryC3P11V1Main(ann, logicOutdir string) {
 				if didx == skipDidx { //その他悪性新生物(0210)は飛ばしたい
 					continue
 				}
-				if darr[didx] == 0 { //額が0円の場合も飛ばす。
+				if darr[didx] < 1000 { //額が1000円未満の場合も飛ばす。
 					continue
 				}
 				e := Entry{strconv.Itoa(didx), darr[didx]}
 				a = append(a, e)
+			}
+			if a.Len() <= 0 {
+				continue
 			}
 			wk := []string{strconv.Itoa(ageRange)}
 			sort.Sort(sort.Reverse(a))

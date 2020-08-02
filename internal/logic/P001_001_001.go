@@ -60,7 +60,7 @@ func opSummaryC1P1V1(logicOutdir string) {
 }
 func opSummaryC1P1V1Main(ann, logicOutdir string) {
 	ofnm := logicOutdir + "Result_C1P1V1_" + ann + ".csv"
-	oHandle, _ := os.OpenFile(ofnm, os.O_WRONLY|os.O_CREATE, 0666)
+	oHandle, _ := os.Create(ofnm)
 	defer oHandle.Close()
 	writer := bufio.NewWriter(transform.NewWriter(oHandle, japanese.ShiftJIS.NewEncoder()))
 	as := []string{"1:2", "1:1", "1:3", "2", "3"}
