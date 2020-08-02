@@ -207,6 +207,7 @@ func loadDisPdm(fnmDisPdm string) {
 			return
 		}
 		loadingDisPdmC1P2V1(ck, mnKensaku, cd119, gaku)
+		loadingDisPdmC2P4V1(ck, mnKensaku, cd119, sybcd, flgDoubt, gaku)
 		loadingDisPdmC2P5V1(ck, mnKensaku, cd119, sybcd, flgDoubt, gaku)
 		loadingDisPdmC2P6V1(ck, mnKensaku, cd119, sybcd, flgDoubt, gaku)
 		loadingDisPdmC3P10V1(ck, mnKensaku, cd119, icd10, sybcd, flgDoubt, gaku)
@@ -259,6 +260,7 @@ func opSummary(outDir string) {
 	opSummaryC1P1V1(logicOutdir)
 	opSummaryC1P2V1(logicOutdir)
 	opSummaryC1P3V1(logicOutdir)
+	opSummaryC2P4V1(logicOutdir)
 	opSummaryC2P5V1(logicOutdir)
 	opSummaryC2P6V1(logicOutdir)
 	opSummaryC2P7V1(logicOutdir)
