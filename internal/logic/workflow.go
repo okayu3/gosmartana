@@ -3,6 +3,7 @@ package logic
 import (
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/okayu3/gosmartana/pkg/common"
 	"github.com/okayu3/gosmartana/pkg/rece"
@@ -13,6 +14,15 @@ var MstB = make(map[string][]string)
 
 //MstMiz -- Mizushima-Group DisGroup Definition
 var MstMiz = make(map[string]map[string]bool)
+
+//MstCancer -- Cancer to Idx
+var MstCancer = make(map[string]int)
+
+//MstCancerDsc -- Cancer Nm
+var MstCancerDsc = make(map[string]string)
+
+//CstCancerNum -- Cancer Sort Num
+var CstCancerNum = 0
 
 //DicPop  -- Population of Age Range By 5years
 var DicPop = make(map[string]map[int]int)
@@ -28,6 +38,7 @@ var DicExp = make(map[string][]string)
 func RunLogic(mstDir string, outDir string, settingDir string) {
 	loadMstB(mstDir + "2020/b/b_20200301.txt")
 	loadMstMizushima(mstDir + "mst_mizushima.csv")
+	loadMstCancer(mstDir+"mst_cancer0.csv", mstDir+"mst_cancer1.csv")
 	loadPopulation(settingDir + "setting_population.csv")
 	loadPerson(outDir + "person.csv")
 	preLoadTosekiAndTopics(outDir + "tosekiTopic.csv")
@@ -39,7 +50,7 @@ func RunLogic(mstDir string, outDir string, settingDir string) {
 
 func loadMstB(fnmB string) {
 	if !common.FileExists(fnmB) {
-		log.Println("Mizushima DisGroup Mst Not Found:" + fnmB)
+		log.Println("Disease(B) Mst Not Found:" + fnmB)
 		return
 	}
 	common.LoadCSV(fnmB, func(a []string, lineno int) {
@@ -68,6 +79,37 @@ func loadMstMizushima(fnmMiz string) {
 	}, common.ModeCsvSJIS)
 }
 
+func loadMstCancer(fnmCd119, fnmIcd10 string) {
+	if !common.FileExists(fnmCd119) {
+		log.Println("Cancer Mst(0:cd119) Not Found:" + fnmCd119)
+		return
+	}
+	if !common.FileExists(fnmIcd10) {
+		log.Println("Cancer Mst(1:ICD10) Not Found:" + fnmIcd10)
+		return
+	}
+	var idx = 0
+	common.LoadCSV(fnmCd119, func(a []string, lineno int) {
+		cd := a[1-1]
+		nm := a[2-1]
+		MstCancer[cd] = idx
+		nm = strings.Replace(nm, "の悪性新生物", "", -1)
+		nm = strings.Replace(nm, "＜腫瘍＞", "", -1)
+		MstCancerDsc[cd] = nm
+		idx++
+	}, common.ModeCsvSJIS)
+	common.LoadCSV(fnmIcd10, func(a []string, lineno int) {
+		cd := a[1-1]
+		nm := a[2-1]
+		MstCancer[cd] = idx
+		nm = strings.Replace(nm, "の悪性新生物", "", -1)
+		nm = strings.Replace(nm, "＜腫瘍＞", "", -1)
+		MstCancerDsc[cd] = nm
+		idx++
+	}, common.ModeCsvSJIS)
+	CstCancerNum = idx
+}
+
 func loadPopulation(fnmPop string) {
 	if !common.FileExists(fnmPop) {
 		log.Println("Population Mst Not Found:" + fnmPop)
@@ -82,6 +124,9 @@ func loadPopulation(fnmPop string) {
 		"被扶養者計":  "2:0",
 		"被扶養者男性": "2:1",
 		"被扶養者女性": "2:2",
+		"特退任継計":  "tn:0",
+		"特退任継男性": "tn:1",
+		"特退任継女性": "tn:2",
 	}
 	common.LoadCSV(fnmPop, func(a []string, lineno int) {
 		k, ok := m[a[0]]
@@ -105,9 +150,16 @@ func loadPerson(fnmPsnMst string) {
 	}
 	common.LoadCSV(fnmPsnMst, func(a []string, lineno int) {
 		ck := a[0]
-		gend := a[4]
-		ymdB := a[5]
-		DicPsn[ck] = []string{gend, ymdB}
+		iKi := a[2-1]
+		gend := a[5-1]
+		ymdB := a[6-1]
+		sort := "0"
+		if iKi == "９００１" || iKi == "9001" {
+			sort = "1"
+		} else if iKi == "１８５１" || iKi == "1851" {
+			sort = "2"
+		}
+		DicPsn[ck] = []string{gend, ymdB, sort}
 	}, common.ModeCsvUTF8)
 }
 
@@ -148,6 +200,7 @@ func loadDisPdm(fnmDisPdm string) {
 		mnKensaku := a[2-1]
 		sybcd := a[7-1]
 		cd119 := a[10-1]
+		icd10 := a[11-1]
 		flgDoubt := a[17-1]
 		gaku := common.Atoi(a[20-1], 0)
 		if gaku == 0 {
@@ -156,6 +209,9 @@ func loadDisPdm(fnmDisPdm string) {
 		loadingDisPdmC1P2V1(ck, mnKensaku, cd119, gaku)
 		loadingDisPdmC2P5V1(ck, mnKensaku, cd119, sybcd, flgDoubt, gaku)
 		loadingDisPdmC2P6V1(ck, mnKensaku, cd119, sybcd, flgDoubt, gaku)
+		loadingDisPdmC3P10V1(ck, mnKensaku, cd119, icd10, sybcd, flgDoubt, gaku)
+		loadingDisPdmC3P11V1(ck, mnKensaku, cd119, icd10, sybcd, flgDoubt, gaku)
+		loadingDisPdmC4P15V1(ck, mnKensaku, cd119, icd10, sybcd, flgDoubt, gaku)
 
 	}, common.ModeCsvUTF8)
 }
@@ -206,6 +262,9 @@ func opSummary(outDir string) {
 	opSummaryC2P5V1(logicOutdir)
 	opSummaryC2P6V1(logicOutdir)
 	opSummaryC2P7V1(logicOutdir)
+	opSummaryC3P10V1(logicOutdir)
+	opSummaryC3P11V1(logicOutdir)
+	opSummaryC4P15V1(logicOutdir)
 }
 
 func calcAgeRange(ymdB, sinryoYm string) int {
