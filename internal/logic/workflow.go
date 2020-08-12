@@ -247,6 +247,7 @@ func loadTosekiAndTopics(fnmTosekiTopic string) {
 		flgTestHbA1c := a[12-1]
 		flgTestFat := a[13-1]
 		//for 002_007_001 From Here
+		loadingTosekiTopicC2P4V1(ck, mnKensaku, flgToseki, flgInsulin, flgMngDiabetes, flgMngBP, flgMngFat, flgSmoking, flgYoboToseki, flgTestHbA1c, flgTestFat)
 		loadingTosekiTopicC2P6V1(ck, mnKensaku, flgToseki, flgInsulin, flgMngDiabetes, flgMngBP, flgMngFat, flgSmoking, flgYoboToseki, flgTestHbA1c, flgTestFat)
 		loadingTosekiTopicC2P7V1(ck, mnKensaku, flgToseki, flgInsulin, flgMngDiabetes, flgMngBP, flgMngFat, flgSmoking, flgYoboToseki, flgTestHbA1c, flgTestFat)
 		//for 002_007_001 Till Here

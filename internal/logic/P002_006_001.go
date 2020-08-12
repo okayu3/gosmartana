@@ -163,6 +163,7 @@ func loadingTosekiTopicC2P6V1(ck, mnKensaku,
 func opSummaryC2P6V1(logicOutdir string) {
 	for ann := range dicC2P6V1wk {
 		opSummaryC2P6V1Main(ann, logicOutdir)
+		opSummaryC2P8V1Main(ann, logicOutdir)
 	}
 }
 
@@ -171,6 +172,9 @@ func opSummaryC2P6V1Main(ann, logicOutdir string) {
 	oHandle, _ := os.Create(ofnm)
 	defer oHandle.Close()
 	writer := bufio.NewWriter(transform.NewWriter(oHandle, japanese.ShiftJIS.NewEncoder()))
+
+	ttl := "被保被扶区分,性別,年齢,合計金額,医科入院,医科外来,調剤,傷病名１,傷病名２,傷病名３,傷病名４,傷病名５,糖尿病,インスリン療法,糖尿病性神経症,糖尿病性網膜症,動脈閉塞,高血圧症,高尿酸血症,虚血性心疾患,脳血管疾患,１型糖尿病"
+	writer.WriteString(ttl + common.CrLf)
 
 	a := List{}
 	for k, data := range dicC2P6V1wk[ann] {
@@ -204,6 +208,58 @@ func opSummaryC2P6V1Main(ann, logicOutdir string) {
 
 		}
 		writer.WriteString(strings.Join(arr, common.Comma) + common.CrLf)
+	}
+	writer.Flush()
+}
+
+func opSummaryC2P8V1Main(ann, logicOutdir string) {
+	ofnm := logicOutdir + "Result_C2P8V1_" + ann + ".csv"
+	oHandle, _ := os.Create(ofnm)
+	defer oHandle.Close()
+	writer := bufio.NewWriter(transform.NewWriter(oHandle, japanese.ShiftJIS.NewEncoder()))
+
+	ttl := "区分,患者数,医療費"
+	writer.WriteString(ttl + common.CrLf)
+
+	var prefix string
+	sumDic := make(map[string][]int)
+
+	//		dicC2P6V1wk[ann][ck] = []string{honn, gend, strconv.Itoa(age), strconv.Itoa(disCost)}
+
+	for ck, arr := range dicC2P6V1wk[ann] {
+		honn := arr[0]
+		gend := arr[1]
+		cst := common.Atoi(arr[3], 0)
+		db, okA := DicPsn[ck]
+		if !okA {
+			continue
+		}
+		sort := db[3-1]
+
+		if sort == "0" {
+			prefix = honn
+		} else {
+			prefix = "tn"
+		}
+		kk := []string{"0", gend, prefix + ":0", prefix + ":" + gend}
+		for _, k := range kk {
+			if _, ok := sumDic[k]; !ok {
+				sumDic[k] = make([]int, 2)
+			}
+			sumDic[k][0]++
+			sumDic[k][1] += cst
+		}
+	}
+	pgDsc := []string{"全体", "男性", "女性", "一般本人(全体)",
+		"一般本人(男性)", "一般本人(女性)", "一般家族(全体)", "一般家族(男性)",
+		"一般家族(女性)", "特退任継(全体)", "特退任継(男性)", "特退任継(女性)"}
+	pgFlg := []string{"0", "1", "2", "1:0", "1:1", "1:2", "2:0", "2:1", "2:2", "tn:0", "tn:1", "tn:2"}
+	for idx, pg := range pgFlg {
+		if _, ok := sumDic[pg]; !ok {
+			continue
+		}
+		wk0 := []string{pgDsc[idx], strconv.Itoa(sumDic[pg][0]), strconv.Itoa(sumDic[pg][1])}
+		writer.WriteString(strings.Join(wk0, common.Comma) + common.CrLf)
 	}
 	writer.Flush()
 }

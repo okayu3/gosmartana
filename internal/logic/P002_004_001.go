@@ -15,24 +15,26 @@ import (
 // dicC2P4V1DisMap -- annual -- ckey -- honn
 var dicC2P4V1DisMap = make(map[string][]map[string]string)
 var mmC2P4V1 = []string{
-	"D0010", //糖尿病
-	"D0020", //高血圧症
-	"D0040", //高脂血症
-	"D0050", //高尿酸血症
-	"D0060", //肝障害
-	"D0065", //動脈硬化
-	"D0070", //糖尿病性神経症
-	"D0080", //糖尿病性網膜症
-	"D0090", //糖尿病性腎症
-	"D0100", //痛風腎
-	"D0110", //高血圧性腎臓障害
-	"D0120", //脳血管疾患
-	"D0130", //脳出血
-	"D0140", //脳梗塞
-	"D0150", //その他の脳血管疾患
-	"D0160", //虚血性心疾患
-	"D0170", //動脈閉塞
-	"D0180", //大動脈疾患
+	"D0010",  //糖尿病
+	"INS",    //インスリン療法
+	"D0020",  //高血圧症
+	"D0040",  //高脂血症
+	"D0050",  //高尿酸血症
+	"D0060",  //肝障害
+	"D0065",  //動脈硬化
+	"D0070",  //糖尿病性神経症
+	"D0080",  //糖尿病性網膜症
+	"D0090",  //糖尿病性腎症
+	"D0100",  //痛風腎
+	"D0110",  //高血圧性腎臓障害
+	"D0120",  //脳血管疾患
+	"D0130",  //脳出血
+	"D0140",  //脳梗塞
+	"D0150",  //その他の脳血管疾患
+	"D0160",  //虚血性心疾患
+	"D0170",  //動脈閉塞
+	"D0180",  //大動脈疾患
+	"TOSEKI", //人工透析
 }
 
 func loadingDisPdmC2P4V1(ck, mnKensaku, cd119, sybcd, flgDoubt string, gaku int) {
@@ -57,12 +59,50 @@ func loadingDisPdmC2P4V1(ck, mnKensaku, cd119, sybcd, flgDoubt string, gaku int)
 
 	d := dicC2P4V1DisMap[ann]
 	for idx, m := range mmC2P4V1 {
-		if m == "" {
+		if !strings.HasPrefix(m, "D") {
 			continue
 		}
 		if _, ok := MstMiz[m][sybcd]; ok {
 			d[idx][ck] = honn
 		}
+	}
+
+}
+
+func loadingTosekiTopicC2P4V1(ck, mnKensaku,
+	flgToseki, flgInsulin, flgMngDiabetes,
+	flgMngBP, flgMngFat, flgSmoking,
+	flgYoboToseki, flgTestHbA1c, flgTestFat string) {
+	//i: 1  インスリン療法
+	//i: 19 人工透析
+
+	da, okA := DicExp[mnKensaku]
+	if !okA {
+		return
+	}
+	honn := da[2-1]
+	seikyuYm := da[5-1]
+	ann := calcReceAnnual(seikyuYm)
+
+	if flgInsulin == "0" && flgToseki == "0" {
+		return
+	}
+	if _, ok := dicC2P4V1DisMap[ann]; !ok {
+		dicC2P4V1DisMap[ann] = make([](map[string]string), len(mmC2P4V1))
+		for i := 0; i < len(mmC2P4V1); i++ {
+			dicC2P4V1DisMap[ann][i] = make(map[string]string)
+		}
+	}
+
+	d := dicC2P4V1DisMap[ann]
+
+	if flgInsulin != "0" {
+		//i: 1  インスリン療法
+		d[1][ck] = honn
+	}
+	if flgToseki != "0" {
+		//i: 19 人工透析
+		d[19][ck] = honn
 	}
 
 }
@@ -111,24 +151,26 @@ func opSummaryC2P4V1Main(ann, logicOutdir string) {
 	pgFlg := []string{"0", "1", "2", "1:0", "1:1", "1:2", "2:0", "2:1", "2:2", "tn:0", "tn:1", "tn:2"}
 
 	mmDsc := map[string]string{
-		"D0010": "糖尿病",
-		"D0020": "高血圧症",
-		"D0040": "高脂血症",
-		"D0050": "高尿酸血症",
-		"D0060": "肝障害",
-		"D0065": "動脈硬化",
-		"D0070": "糖尿病性神経症",
-		"D0080": "糖尿病性網膜症",
-		"D0090": "糖尿病性腎症",
-		"D0100": "痛風腎",
-		"D0110": "高血圧性腎臓障害",
-		"D0120": "脳血管疾患",
-		"D0130": "脳出血",
-		"D0140": "脳梗塞",
-		"D0150": "その他の脳血管疾患",
-		"D0160": "虚血性心疾患",
-		"D0170": "動脈閉塞",
-		"D0180": "大動脈疾患",
+		"D0010":  "糖尿病",
+		"INS":    "インスリン療法",
+		"D0020":  "高血圧症",
+		"D0040":  "高脂血症",
+		"D0050":  "高尿酸血症",
+		"D0060":  "肝障害",
+		"D0065":  "動脈硬化",
+		"D0070":  "糖尿病性神経症",
+		"D0080":  "糖尿病性網膜症",
+		"D0090":  "糖尿病性腎症",
+		"D0100":  "痛風腎",
+		"D0110":  "高血圧性腎臓障害",
+		"D0120":  "脳血管疾患",
+		"D0130":  "脳出血",
+		"D0140":  "脳梗塞",
+		"D0150":  "その他の脳血管疾患",
+		"D0160":  "虚血性心疾患",
+		"D0170":  "動脈閉塞",
+		"D0180":  "大動脈疾患",
+		"TOSEKI": "人工透析",
 	}
 
 	for idx, pg := range pgFlg {
