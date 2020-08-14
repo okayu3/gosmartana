@@ -35,6 +35,7 @@ func loadingTosekiTopicC2P7V1(ck, mnKensaku,
 	ymdB := db[2-1]
 	ann := calcReceAnnual(seikyuYm)
 	ageRange := calcAgeRange(ymdB, strconv.Itoa(common.AnnualAtYm(sinryoYm))+"04")
+	sort := db[3-1]
 
 	if _, ok0 := dicC2P7V1wk[ann][ck]; ok0 {
 		return
@@ -49,7 +50,12 @@ func loadingTosekiTopicC2P7V1(ck, mnKensaku,
 	}
 	d := dicC2P7V1[ann]
 
-	kk := []string{"0", gend, honn + ":0", honn + ":" + gend}
+	prefix := honn
+	if sort != "0" {
+		prefix = "tn"
+	}
+	//kk := []string{"0", gend, honn + ":0", honn + ":" + gend}
+	kk := []string{"0", gend, prefix + ":0", prefix + ":" + gend}
 	for _, k := range kk {
 		if _, ok := d[k]; !ok {
 			d[k] = make(map[int]int)
@@ -78,10 +84,10 @@ func opSummaryC2P7V1Main(ann, logicOutdir string) {
 	defer oHandle.Close()
 	writer := bufio.NewWriter(transform.NewWriter(oHandle, japanese.ShiftJIS.NewEncoder()))
 
-	pgDsc := []string{"全体", "男性", "女性", "本人(全体)",
-		"本人(男性)", "本人(女性)", "本人外(全体)", "本人外(男性)",
-		"本人外(女性)"}
-	pgFlg := []string{"0", "1", "2", "1:0", "1:1", "1:2", "2:0", "2:1", "2:2"}
+	pgDsc := []string{"全体", "男性", "女性", "一般本人(全体)",
+		"一般本人(男性)", "一般本人(女性)", "一般家族(全体)", "一般家族(男性)",
+		"一般家族(女性)", "特退任継(全体)", "特退任継(男性)", "特退任継(女性)"}
+	pgFlg := []string{"0", "1", "2", "1:0", "1:1", "1:2", "2:0", "2:1", "2:2", "tn:0", "tn:1", "tn:2"}
 	title := "年齢層,人数,透析人数"
 
 	for idx, pg := range pgFlg {
