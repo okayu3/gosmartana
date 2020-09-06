@@ -84,14 +84,14 @@ func MakeExpenseMed(one [][]string, fnm string, args []interface{}) int {
 	}
 	opSaveExpense(outHandle, ck, mnKensaku, gend, ymdB, shubetu,
 		jitsuDates, ten, kbn, sinryoYm, innDate,
-		prf, pnt, ircd, irnm, seikyuYm, common.Empty)
+		prf, pnt, ircd, irnm, seikyuYm, common.Empty, common.Empty, common.Empty)
 	return 1
 }
 
 func opSaveExpense(outHandle *os.File, ck, mnKensaku,
 	gend, ymdB, shubetu,
 	jitsuDates, ten, kbn, sinryoYm, innDate,
-	prf, pnt, ircd, irnm, seikyuYm, reqIrNo string) {
+	prf, pnt, ircd, irnm, seikyuYm, phaTen, reqMnKensaku, reqIrNo string) {
 
 	nyugai := "2"
 	honnin := "1"
@@ -105,8 +105,6 @@ func opSaveExpense(outHandle *os.File, ck, mnKensaku,
 	if (wk != 1) && (wk != 2) {
 		honnin = "2"
 	}
-	phaTen := "0"
-	reqMnKensaku := common.Empty
 	oneExpense := strings.Join([]string{ck, mnKensaku,
 		gend, ymdB, shubetu, nyugai, honnin,
 		jitsuDates, ten, kbn, sinryoYm, innDate,

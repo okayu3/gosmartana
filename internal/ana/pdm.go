@@ -26,6 +26,8 @@ const (
 	PdmDataFemale = "pdm_icd10s_female.csv"
 )
 
+var bankPhaExp = make(map[string]map[string]int)
+
 //RunPDM -- PDM の実行
 func RunPDM(fnm, mstdir, outDir string) {
 	iniPDM()
@@ -410,4 +412,35 @@ func OpAfterPDM(outdir string) {
 		oneline := strings.Join(arr, common.Comma)
 		ofileDiseaseOut.WriteString(oneline + "\n")
 	}, common.ModeCsvUTF8)
+}
+
+//storePhaExpence - 調剤レセの金額をプール。医科または歯科に配分します。
+func storePhaExpence(ckey, mnkensaku, ircd, shohoYm, phaTen string) {
+	kk := ckey + common.Collon + ircd + common.Collon + shohoYm
+	if _, ok := bankPhaExp[kk]; ok {
+		bankPhaExp[kk][mnkensaku] += common.Atoi(phaTen, 0)
+	} else {
+		bankPhaExp[kk] = make(map[string]int)
+		bankPhaExp[kk][mnkensaku] = common.Atoi(phaTen, 0)
+	}
+}
+
+//restorePhaExpense - 調剤レセの金額を 対応する医科、歯科のexpenseに供給
+func restorePhaExpense(ckey, prf, pnt, ircd, sinryoYm string) []string {
+	ircdFull := prf + pnt + ircd
+	kk := ckey + common.Collon + ircdFull + common.Collon + sinryoYm
+	if _, ok := bankPhaExp[kk]; !ok {
+		return []string{"0", common.Empty}
+	}
+	m := bankPhaExp[kk]
+	tenAll := 0
+	ksk := []string{}
+	for mnKensaku, ten := range m {
+		tenAll += ten
+		ksk = append(ksk, mnKensaku)
+	}
+	return []string{
+		strconv.Itoa(tenAll),
+		strings.Join(ksk, common.Collon),
+	}
 }

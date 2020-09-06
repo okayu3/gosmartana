@@ -108,13 +108,22 @@ func MakeBasicsMED(one [][]string, fnm string, args []interface{}) int {
 			opCheckActTopic(act, topicCheck)
 		}
 	}
+	//対応する調剤レセがあった場合、「調剤レセ点数、調剤レセ検索番号」が帰ってくる
+	phaInf := restorePhaExpense(ck, prf, pnt, ircd, sinryoYm)
+	phaTen := phaInf[0]
+	phaKensaku := phaInf[1]
+
 	opSaveExpense(outHandle, ck, mnKensaku, gend, ymdB, shubetu,
 		jitsuDates, ten, kbn, sinryoYm, innDate,
-		prf, pnt, ircd, irnm, seikyuYm, common.Empty)
+		prf, pnt, ircd, irnm, seikyuYm, phaTen, phaKensaku, common.Empty)
 
 	opSaveTosekiAndSTopic(outHandleTopic, ck, mnKensaku, tokki, topicCheck)
 
-	OpSavePDMData(aOutHandlesPDM, mnKensaku, jitsuDates, ten, gend, aCnt, aIcd10)
+	//ここで、医科レセプト点数と対応する調剤レセプト点数を合計したものをPDMセットする。
+	tenSum := strconv.Itoa(common.Atoi(ten, 0) + common.Atoi(phaTen, 0))
+
+	//OpSavePDMData(aOutHandlesPDM, mnKensaku, jitsuDates, ten, gend, aCnt, aIcd10)
+	OpSavePDMData(aOutHandlesPDM, mnKensaku, jitsuDates, tenSum, gend, aCnt, aIcd10)
 
 	nyugai := "2"
 	if (shubetu != common.Empty) && (int(shubetu[3]-'0')%2 == 1) {
@@ -124,7 +133,7 @@ func MakeBasicsMED(one [][]string, fnm string, args []interface{}) int {
 	return 1
 }
 
-//MakeBasicsDEN -- 医科レセプトからExpense,SV,toseki作成
+//MakeBasicsDEN -- 歯科レセプトからExpense,SV,toseki作成
 func MakeBasicsDEN(one [][]string, fnm string, args []interface{}) int {
 	var arr []string
 	var sort, mnKensaku, ymdB, gend, name, kananame string
@@ -217,13 +226,21 @@ func MakeBasicsDEN(one [][]string, fnm string, args []interface{}) int {
 			opCheckActTopic(act, topicCheck)
 		}
 	}
+	//対応する調剤レセがあった場合、「調剤レセ点数、調剤レセ検索番号」が帰ってくる
+	phaInf := restorePhaExpense(ck, prf, pnt, ircd, sinryoYm)
+	phaTen := phaInf[0]
+	phaKensaku := phaInf[1]
+
 	opSaveExpense(outHandle, ck, mnKensaku, gend, ymdB, shubetu,
 		jitsuDates, ten, kbn, sinryoYm, innDate,
-		prf, pnt, ircd, irnm, seikyuYm, common.Empty)
+		prf, pnt, ircd, irnm, seikyuYm, phaTen, phaKensaku, common.Empty)
 
 	opSaveTosekiAndSTopic(outHandleTopic, ck, mnKensaku, tokki, topicCheck)
 
-	OpSavePDMData(aOutHandlesPDM, mnKensaku, jitsuDates, ten, gend, aCnt, aIcd10)
+	//ここで、歯科レセプト点数と対応する調剤レセプト点数を合計したものをPDMセットする。
+	tenSum := strconv.Itoa(common.Atoi(ten, 0) + common.Atoi(phaTen, 0))
+	OpSavePDMData(aOutHandlesPDM, mnKensaku, jitsuDates, tenSum, gend, aCnt, aIcd10)
+	//OpSavePDMData(aOutHandlesPDM, mnKensaku, jitsuDates, ten, gend, aCnt, aIcd10)
 
 	nyugai := "2"
 	if (shubetu != common.Empty) && (int(shubetu[3]-'0')%2 == 1) {
@@ -239,6 +256,7 @@ func MakeBasicsPHA(one [][]string, fnm string, args []interface{}) int {
 	var sort, mnKensaku, ymdB, gend, name, kananame string
 	var prf, pnt, ircd, irnm, seikyuYm string
 	var reqIrNo string
+	var shohoYm string
 	var sinryoYm, innDate, shubetu string
 	var jitsuDates, ten string
 	var ck, iKi, iBan string
@@ -316,14 +334,18 @@ func MakeBasicsPHA(one [][]string, fnm string, args []interface{}) int {
 			if w, err := strconv.ParseFloat(arr[rece.RCZsuryo], 64); err == nil {
 				count += w
 			}
+			shohoYmd := common.YmdW2g(arr[rece.RCZprscYmd])
+			shohoYm = shohoYmd[:6]
 		} else if sort == "IY" {
 			sCount := strconv.FormatFloat(count, 'f', -1, 64)
 			collectGeneric(arr[rece.RIYdrugCd], arr[rece.RIYamount], sCount, sinryoYm, dicDrug)
 		}
 	}
+	//storePhaExpence -- pdm.go
+	storePhaExpence(ck, mnKensaku, reqIrNo, shohoYm, ten)
 	opSaveExpense(outHandle, ck, mnKensaku, gend, ymdB, shubetu,
 		jitsuDates, ten, kbn, sinryoYm, innDate,
-		prf, pnt, ircd, irnm, seikyuYm, reqIrNo)
+		prf, pnt, ircd, irnm, seikyuYm, common.Empty, common.Empty, reqIrNo)
 
 	opSaveGeneric(outHandleGene, ck, mnKensaku, dicDrug, sinryoYm, "2")
 	return 1
@@ -457,9 +479,10 @@ func MakeBasicsDPC(one [][]string, fnm string, args []interface{}) int {
 			}
 		}
 	}
+	//DPCに対応する調剤レセプトはないはずなので、調剤レセ点数、調剤レセ検索番号はカラとする。
 	opSaveExpense(outHandle, ck, mnKensaku, gend, ymdB, shubetu,
 		jitsuDates, ten, kbn, sinryoYm, innDate,
-		prf, pnt, ircd, irnm, seikyuYm, common.Empty)
+		prf, pnt, ircd, irnm, seikyuYm, common.Empty, common.Empty, common.Empty)
 
 	opSaveTosekiAndSTopic(outHandleTopic, ck, mnKensaku, tokki, topicCheck)
 

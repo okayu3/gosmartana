@@ -101,10 +101,12 @@ func makeExpenseWithSV(mstDir, outDir, receDir string) {
 	ofnmGene := outDir + "generic.csv"
 	ofileGene, _ := os.OpenFile(ofnmGene, os.O_WRONLY|os.O_CREATE, 0666)
 
+	rece.LoadArr(receFnms[3], ana.MakeBasicsPHA, []interface{}{ofileExp, ofileGene})
 	rece.LoadArr(receFnms[0], ana.MakeBasicsMED, []interface{}{ofileExp, ofileSV, ofileTopic, ohandlesPDM, ofileGene})
 	rece.LoadArr(receFnms[1], ana.MakeBasicsDPC, []interface{}{ofileExp, ofileSV, ofileTopic, ohandlesPDM, ofileGene})
 	rece.LoadArr(receFnms[2], ana.MakeBasicsDEN, []interface{}{ofileExp, ofileSV, ofileTopic, ohandlesPDM, ofileGene})
-	rece.LoadArr(receFnms[3], ana.MakeBasicsPHA, []interface{}{ofileExp, ofileGene})
+	//rece.LoadArr(receFnms[3], ana.MakeBasicsPHA, []interface{}{ofileExp, ofileGene})
+
 	//rece.Load(fnm, ana.MakeBasicsMed, []interface{}{ofileExp, ofileSV, ofileTopic, ohandlesPDM})
 	//closing
 	ana.ClosePDMHandle(ohandlesPDM)
