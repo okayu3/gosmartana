@@ -7,3 +7,9 @@ OUT_DIR = "C:/Users/woodside3/go/output/"
 [SettingsPath]
 SETTING_DIR = "C:/Users/woodside3/go/settings/"
 
+[Tokutai]
+TOKUTAI_INS_KIGO = "9001"
+
+[NiniKeizoku]
+NINKEI_INS_KIGO = "1851"
+

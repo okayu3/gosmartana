@@ -7,6 +7,7 @@ import (
 
 	"github.com/okayu3/gosmartana/pkg/common"
 	"github.com/okayu3/gosmartana/pkg/rece"
+	"golang.org/x/text/width"
 )
 
 //MstB -- disease Mst
@@ -35,12 +36,12 @@ var DicExp = make(map[string][]string)
 
 //RunLogic -- logic running
 //  param: outDir := "C:/Users/woodside3/go/output/"
-func RunLogic(mstDir string, outDir string, settingDir string) {
+func RunLogic(mstDir, outDir, settingDir, tokutaiIki, ninkeiIki string) {
 	loadMstB(mstDir + "2020/b/b_20200301.txt")
 	loadMstMizushima(mstDir + "mst_mizushima.csv")
 	loadMstCancer(mstDir+"mst_cancer0.csv", mstDir+"mst_cancer1.csv")
 	loadPopulation(settingDir + "setting_population.csv")
-	loadPerson(outDir + "person.csv")
+	loadPerson(outDir+"person.csv", tokutaiIki, ninkeiIki)
 	preLoadTosekiAndTopics(outDir + "tosekiTopic.csv")
 	loadExpense(outDir + "expense.csv")
 	loadDisPdm(outDir + "diseasePdm.csv")
@@ -143,20 +144,23 @@ func loadPopulation(fnmPop string) {
 
 }
 
-func loadPerson(fnmPsnMst string) {
+func loadPerson(fnmPsnMst, tokutaiIki, ninkeiIki string) {
 	if !common.FileExists(fnmPsnMst) {
 		log.Println("Person Mst Not Found:" + fnmPsnMst)
 		return
 	}
+	tokutaiW := width.Widen.String(tokutaiIki)
+	ninkeiW := width.Widen.String(ninkeiIki)
+
 	common.LoadCSV(fnmPsnMst, func(a []string, lineno int) {
 		ck := a[0]
 		iKi := a[2-1]
 		gend := a[5-1]
 		ymdB := a[6-1]
 		sort := "0"
-		if iKi == "９００１" || iKi == "9001" {
+		if iKi == tokutaiW || iKi == tokutaiIki {
 			sort = "1"
-		} else if iKi == "１８５１" || iKi == "1851" {
+		} else if iKi == ninkeiW || iKi == ninkeiIki {
 			sort = "2"
 		}
 		DicPsn[ck] = []string{gend, ymdB, sort}
